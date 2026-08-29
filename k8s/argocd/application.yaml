@@ -1,0 +1,35 @@
+# Apply once, after Argo CD is installed in your cluster:
+#   kubectl apply -f k8s/argocd/application.yaml
+#
+# This tells Argo CD to continuously watch charts/cloudcrafter in the given
+# repo/branch and keep the "cloudcrafter" namespace in sync with it. Any
+# chart version bump pushed by CI (see .github/workflows/ci.yml) is picked
+# up automatically — no manual `kubectl apply` or `helm upgrade` needed.
+
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cloudcrafter
+  namespace: argocd
+spec:
+  project: default
+
+  source:
+    # Replace with your actual repo URL once it's pushed (Part A).
+    repoURL: https://github.com/<your-org>/cloudcrafter-api.git
+    targetRevision: main
+    path: charts/cloudcrafter
+    helm:
+      valueFiles:
+        - values.yaml
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: cloudcrafter
+
+  syncPolicy:
+    automated:
+      prune: true      # remove resources that are no longer in Git
+      selfHeal: true    # revert manual cluster drift back to match Git
+    syncOptions:
+      - CreateNamespace=true

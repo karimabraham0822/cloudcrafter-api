@@ -1,0 +1,19 @@
+apiVersion: v2
+name: cloudcrafter
+description: Umbrella chart for the full CloudCrafter API release (all 4 microservices + ingress)
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+dependencies:
+  - name: users
+    version: 0.2.0
+    repository: "file://../users"
+  - name: events
+    version: 0.1.0
+    repository: "file://../events"
+  - name: tickets
+    version: 0.1.0
+    repository: "file://../tickets"
+  - name: notifications
+    version: 0.1.0
+    repository: "file://../notifications"

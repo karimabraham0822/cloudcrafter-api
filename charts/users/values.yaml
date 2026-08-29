@@ -1,0 +1,39 @@
+replicaCount: 2
+
+image:
+  repository: cloudcrafter/users
+  tag: local
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 3001
+
+env:
+  PORT: "3001"
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    cpu: 150m
+    memory: 128Mi
+
+probes:
+  path: /health
+
+namespace: cloudcrafter
+
+metrics:
+  enabled: true
+  prometheusReleaseLabel: kube-prometheus-stack
+
+jwt:
+  enabled: true
+  secretName: users-jwt-key
+  secretKey: jwt-secret
+  mountPath: /etc/jwt
+serviceVersion: "1.0.0"
+gitSha: "unknown"

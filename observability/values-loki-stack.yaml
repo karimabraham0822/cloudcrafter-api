@@ -1,0 +1,45 @@
+# Values for the grafana/loki-stack chart (Loki + Promtail).
+# Install with:
+#   helm install loki grafana/loki-stack \
+#     -n monitoring --create-namespace -f observability/values-loki-stack.yaml
+#
+# Promtail runs as a DaemonSet, tails every pod's stdout/stderr on each node,
+# and ships them into Loki — including all 4 CloudCrafter microservices and
+# the Lambda container logs, no per-pod log-scraping config needed.
+
+loki:
+  isDefault: false
+  persistence:
+    enabled: true
+    size: 2Gi
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 200m
+      memory: 512Mi
+
+promtail:
+  enabled: true
+  resources:
+    requests:
+      cpu: 25m
+      memory: 64Mi
+    limits:
+      cpu: 100m
+      memory: 128Mi
+  config:
+    snippets:
+      # Tag every log line with its Kubernetes namespace and pod label "app"
+      # (users/events/tickets/notifications) so Grafana can filter per service.
+      pipelineStages:
+        - cri: {}
+      extraRelabelConfigs:
+        - source_labels: [__meta_kubernetes_pod_label_app]
+          target_label: app
+        - source_labels: [__meta_kubernetes_namespace]
+          target_label: namespace
+
+grafana:
+  enabled: false   # Grafana already comes from kube-prometheus-stack

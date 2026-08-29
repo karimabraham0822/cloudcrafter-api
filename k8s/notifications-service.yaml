@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: notifications
+  namespace: cloudcrafter
+spec:
+  selector:
+    app: notifications
+  ports:
+    - port: 80
+      targetPort: 3004
+  type: ClusterIP

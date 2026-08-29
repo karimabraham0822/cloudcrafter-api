@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "users.fullname" . }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: users
+spec:
+  replicas: {{ .Values.replicaCount }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      # Zero downtime: never drop below full capacity, add one extra pod
+      # at a time while rotating. Combined with the readinessProbe below,
+      # a pod only receives traffic once it's actually up with the new key.
+      maxUnavailable: 0
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: users
+  template:
+    metadata:
+      labels:
+        app: users
+    spec:
+      containers:
+        - name: users
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.service.targetPort }}
+          env:
+            - name: PORT
+              value: "{{ .Values.env.PORT }}"
+            - name: SERVICE_VERSION
+              value: "{{ .Values.serviceVersion | default "1.0.0" }}"
+            - name: GIT_SHA
+              value: "{{ .Values.gitSha | default "unknown" }}"
+            {{- if .Values.jwt.enabled }}
+            - name: JWT_SECRET_PATH
+              value: "{{ .Values.jwt.mountPath }}/{{ .Values.jwt.secretKey }}"
+            {{- end }}
+          {{- if .Values.jwt.enabled }}
+          volumeMounts:
+            - name: jwt-key
+              mountPath: {{ .Values.jwt.mountPath }}
+              readOnly: true
+          {{- end }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.probes.path }}
+              port: {{ .Values.service.targetPort }}
+            initialDelaySeconds: 3
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.probes.path }}
+              port: {{ .Values.service.targetPort }}
+            initialDelaySeconds: 5
+            periodSeconds: 10
+      {{- if .Values.jwt.enabled }}
+      volumes:
+        - name: jwt-key
+          secret:
+            secretName: {{ .Values.jwt.secretName }}
+      {{- end }}

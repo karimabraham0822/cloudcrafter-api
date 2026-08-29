@@ -1,0 +1,20 @@
+{{- if .Values.metrics.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: tickets
+  namespace: {{ .Values.namespace }}
+  labels:
+    release: {{ .Values.metrics.prometheusReleaseLabel | default "kube-prometheus-stack" }}
+spec:
+  selector:
+    matchLabels:
+      app: tickets
+  namespaceSelector:
+    matchNames:
+      - {{ .Values.namespace }}
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 15s
+{{- end }}

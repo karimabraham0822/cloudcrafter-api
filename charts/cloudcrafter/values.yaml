@@ -1,0 +1,7 @@
+# Per-namespace overrides live in values-<env>.yaml (see charts/cloudcrafter/).
+# Every subchart inherits its own values.yaml unless overridden here.
+namespace: cloudcrafter
+ingress:
+  enabled: true
+  host: cloudcrafter.local
+  className: nginx

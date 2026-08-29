@@ -1,0 +1,33 @@
+replicaCount: 2
+
+image:
+  repository: cloudcrafter/events
+  tag: local
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 3002
+
+env:
+  PORT: "3002"
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    cpu: 150m
+    memory: 128Mi
+
+probes:
+  path: /health
+
+namespace: cloudcrafter
+
+metrics:
+  enabled: true
+  prometheusReleaseLabel: kube-prometheus-stack
+serviceVersion: "1.0.0"
+gitSha: "unknown"

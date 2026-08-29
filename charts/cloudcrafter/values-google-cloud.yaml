@@ -1,0 +1,11 @@
+namespace: google-cloud
+ingress:
+  host: cloudcrafter-gcp.local
+users:
+  namespace: google-cloud
+events:
+  namespace: google-cloud
+tickets:
+  namespace: google-cloud
+notifications:
+  namespace: google-cloud

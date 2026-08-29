@@ -1,0 +1,11 @@
+namespace: aws
+ingress:
+  host: cloudcrafter-aws.local
+users:
+  namespace: aws
+events:
+  namespace: aws
+tickets:
+  namespace: aws
+notifications:
+  namespace: aws

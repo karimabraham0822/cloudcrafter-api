@@ -1,0 +1,64 @@
+# Values for the prometheus-community/kube-prometheus-stack chart.
+# Install with:
+#   helm install kube-prometheus-stack prometheus-community/kube-prometheus-stack \
+#     -n monitoring --create-namespace -f observability/values-kube-prometheus-stack.yaml
+#
+# The release name MUST be "kube-prometheus-stack" (or match
+# metrics.prometheusReleaseLabel in charts/*/values.yaml) so the
+# ServiceMonitor `release` label matches what this chart's Prometheus
+# instance selects on.
+
+prometheus:
+  prometheusSpec:
+    # Watch ServiceMonitors in ALL namespaces, not just monitoring/ —
+    # our services live in cloudcrafter/aws/google-cloud.
+    serviceMonitorSelectorNilUsesHelmValues: false
+    serviceMonitorSelector: {}
+    serviceMonitorNamespaceSelector: {}
+    retention: 6h
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
+
+grafana:
+  adminPassword: cloudcrafter-admin   # change before any real deployment
+  defaultDashboardsEnabled: true
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
+
+  # Auto-provision the Loki datasource alongside the built-in Prometheus one,
+  # so metrics and logs are both queryable from Grafana out of the box.
+  additionalDataSources:
+    - name: Loki
+      type: loki
+      url: http://loki.monitoring.svc.cluster.local:3100
+      access: proxy
+
+  # Auto-load the CloudCrafter dashboard from the ConfigMap created by
+  # scripts/setup-observability.sh (see k8s/monitoring/grafana-dashboard-configmap.yaml).
+  sidecar:
+    dashboards:
+      enabled: true
+      label: grafana_dashboard
+      labelValue: "1"
+      searchNamespace: ALL
+
+alertmanager:
+  enabled: true
+  alertmanagerSpec:
+    resources:
+      requests:
+        cpu: 25m
+        memory: 64Mi
+      limits:
+        cpu: 100m
+        memory: 128Mi

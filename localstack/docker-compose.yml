@@ -1,0 +1,22 @@
+version: "3.8"
+
+services:
+  localstack:
+    image: localstack/localstack:3.4
+    container_name: cloudcrafter-localstack
+    ports:
+      - "4566:4566"   # LocalStack edge port (S3, Lambda, etc.)
+      - "4571:4571"
+    environment:
+      - SERVICES=s3,lambda
+      - DEBUG=1
+      - LAMBDA_EXECUTOR=docker
+      - DOCKER_HOST=unix:///var/run/docker.sock
+      # Reachable from inside the Lambda container back out to your machine,
+      # where `kubectl port-forward` exposes the notifications service.
+      - NOTIFICATIONS_URL=http://host.docker.internal:3004/notifications
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "./volume:/var/lib/localstack"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"

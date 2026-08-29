@@ -1,0 +1,43 @@
+{{- if .Values.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: cloudcrafter-ingress
+  namespace: {{ .Values.namespace }}
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+spec:
+  ingressClassName: {{ .Values.ingress.className }}
+  rules:
+    - host: {{ .Values.ingress.host }}
+      http:
+        paths:
+          - path: /users(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: users
+                port:
+                  number: 80
+          - path: /events(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: events
+                port:
+                  number: 80
+          - path: /tickets(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: tickets
+                port:
+                  number: 80
+          - path: /notifications(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: notifications
+                port:
+                  number: 80
+{{- end }}
